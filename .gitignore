@@ -1,0 +1,66 @@
+#########################
+<<<<<<< HEAD
+### toy_app ###
+# ignore bundle
+/project/toy_app/.bundle
+
+#ignore db
+/project/toy_app/db/*.sqlite3
+/project/toy_app/db/*.sqlite3-journal
+
+# ignore log tmp
+/project/toy_app/log/*
+/project/toy_app/tmp/*
+!/project/toy_app/log/.keep
+!/project/toy_app/tmp/.keep
+
+/project/toy_app/node_modules
+/project/toy_app/yarn-error.log
+
+/project/toy_app/.byebug_history
+
+#########################
+=======
+>>>>>>> 4330fd317cebc212b07650084918070153b66527
+### blog ###
+# ignore bundle
+/project/blog/.bundle
+
+#ignore db
+/project/blog/db/*.sqlite3
+/project/blog/db/*.sqlite3-journal
+
+# ignore log tmp
+/project/blog/log/*
+/project/blog/tmp/*
+!/project/blog/log/.keep
+!/project/blog/tmp/.keep
+
+/project/blog/node_modules
+/project/blog/yarn-error.log
+
+/project/blog/.byebug_history
+
+<<<<<<< HEAD
+
+=======
+#########################
+### toy_app ###
+# ignore bundle
+/project/toy_app/.bundle
+
+#ignore db
+/project/toy_app/db/*.sqlite3
+/project/toy_app/db/*.sqlite3-journal
+
+# ignore log tmp
+/project/toy_app/log/*
+/project/toy_app/tmp/*
+!/project/toy_app/log/.keep
+!/project/toy_app/tmp/.keep
+
+/project/toy_app/node_modules
+/project/toy_app/yarn-error.log
+
+/project/toy_app/.byebug_history
+>>>>>>> 4330fd317cebc212b07650084918070153b66527
