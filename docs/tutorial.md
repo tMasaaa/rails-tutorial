@@ -133,6 +133,15 @@ rails test # rails t
 bundle install # bundle
 ```
 
+- 失敗したとき
+```
+# generate
+rails destroy controller <name>
+# migrate
+rails db:rollback
+rails db:migrate VERSION=0 # 最初の状態に戻す
+```
+
 - git
 ```
 git init
