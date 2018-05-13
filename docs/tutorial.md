@@ -56,6 +56,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - migrateとは？
 - resourceとは？コンポーネントとの違いはなに？(コード化されているということ？): リソースとは、HTTPプロトコル経由で自由にCURDできる、分類されたデータ群のこと。(コンポーネントを扱いやすい形に変換したもの)
 - 本筋ではないが、アドレスバーにURLを入力してどんなプロトコルでどこを通ってroutes.rbが処理するに至るのかその過程が知りたい
+- 
 
 Roadmap
 - hello app(1)
@@ -367,6 +368,7 @@ end
 - まずdef helloとかして確かめるのが大事。
 - ずっとmasterブランチではなく、その都度topicブランチで作業するのが良い習慣。
 - rails generate では、コントローラ名とアクション名を決められる
+
 
 ## 演習
 1.README
