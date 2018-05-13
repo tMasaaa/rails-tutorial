@@ -124,6 +124,15 @@ rails console
 exit
 ```
 
+- 短縮形
+```
+rails server # rails s
+rails console # rails c
+rails generate # rails g
+rails test # rails t
+bundle install # bundle
+```
+
 - git
 ```
 git init
@@ -358,6 +367,8 @@ end
 # 3章
 - まずdef helloとかして確かめるのが大事。
 - ずっとmasterブランチではなく、その都度topicブランチで作業するのが良い習慣。
+- rails generate では、コントローラ名とアクション名を決められる
+
 
 ## 演習
 1.README
