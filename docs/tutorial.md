@@ -56,6 +56,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - migrateとは？
 - resourceとは？コンポーネントとの違いはなに？(コード化されているということ？): リソースとは、HTTPプロトコル経由で自由にCURDできる、分類されたデータ群のこと。(コンポーネントを扱いやすい形に変換したもの)
 - 本筋ではないが、アドレスバーにURLを入力してどんなプロトコルでどこを通ってroutes.rbが処理するに至るのかその過程が知りたい
+- 
 
 Roadmap
 - hello app(1)
@@ -63,6 +64,8 @@ Roadmap
     - Railsアプリの構造
     - RESTアーキテクチャ
 - sample app(3-14):like twitter
+  - 静的なページ
+  - 自動化テスト
 
 困ったときは？
 - https://railsguides.jp/ Railsガイド
@@ -128,6 +131,10 @@ git add README.md
 git commit -m "first commit"
 git remote add origin https://github.com/tMasaaa/rails_toy_app.git
 git push -u origin master
+```
+- git checkout 新しく作る
+```
+git checkout -b <name>
 ```
 
 # 1章
@@ -349,6 +356,13 @@ end
 - app/models/application_record.rb
 
 # 3章
-
+- まずdef helloとかして確かめるのが大事。
+- ずっとmasterブランチではなく、その都度topicブランチで作業するのが良い習慣。
 
 ## 演習
+1.README
+- やる
+
+2.Heroku
+- とばす
+

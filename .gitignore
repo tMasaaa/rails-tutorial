@@ -1,23 +1,23 @@
 #########################
 <<<<<<< HEAD
-### toy_app ###
+### sample_app ###
 # ignore bundle
-/project/toy_app/.bundle
+/project/sample_app/.bundle
 
 #ignore db
-/project/toy_app/db/*.sqlite3
-/project/toy_app/db/*.sqlite3-journal
+/project/sample_app/db/*.sqlite3
+/project/sample_app/db/*.sqlite3-journal
 
 # ignore log tmp
-/project/toy_app/log/*
-/project/toy_app/tmp/*
-!/project/toy_app/log/.keep
-!/project/toy_app/tmp/.keep
+/project/sample_app/log/*
+/project/sample_app/tmp/*
+!/project/sample_app/log/.keep
+!/project/sample_app/tmp/.keep
 
-/project/toy_app/node_modules
-/project/toy_app/yarn-error.log
+/project/sample_app/node_modules
+/project/sample_app/yarn-error.log
 
-/project/toy_app/.byebug_history
+/project/sample_app/.byebug_history
 
 #########################
 =======
@@ -41,9 +41,6 @@
 
 /project/blog/.byebug_history
 
-<<<<<<< HEAD
-
-=======
 #########################
 ### toy_app ###
 # ignore bundle
@@ -63,4 +60,3 @@
 /project/toy_app/yarn-error.log
 
 /project/toy_app/.byebug_history
->>>>>>> 4330fd317cebc212b07650084918070153b66527
