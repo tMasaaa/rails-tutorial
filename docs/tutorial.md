@@ -63,6 +63,8 @@ Roadmap
     - Railsアプリの構造
     - RESTアーキテクチャ
 - sample app(3-14):like twitter
+  - 静的なページ
+  - 自動化テスト
 
 困ったときは？
 - https://railsguides.jp/ Railsガイド
@@ -121,6 +123,15 @@ rails console
 exit
 ```
 
+- 短縮形
+```
+rails server # rails s
+rails console # rails c
+rails generate # rails g
+rails test # rails t
+bundle install # bundle
+```
+
 - git
 ```
 git init
@@ -128,6 +139,10 @@ git add README.md
 git commit -m "first commit"
 git remote add origin https://github.com/tMasaaa/rails_toy_app.git
 git push -u origin master
+```
+- git checkout 新しく作る
+```
+git checkout -b <name>
 ```
 
 # 1章
@@ -349,6 +364,14 @@ end
 - app/models/application_record.rb
 
 # 3章
-
+- まずdef helloとかして確かめるのが大事。
+- ずっとmasterブランチではなく、その都度topicブランチで作業するのが良い習慣。
+- rails generate では、コントローラ名とアクション名を決められる
 
 ## 演習
+1.README
+- やる
+
+2.Heroku
+- とばす
+
