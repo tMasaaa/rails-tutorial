@@ -110,7 +110,15 @@ bundle install --without production
 - rails scaffold
 ```
 # rails generate scaffold [option]
+# rails db:migrate
 rails generate scaffold User name:string email:string
+rails db:migrate
+```
+
+- rails console
+```
+rails console
+exit
 ```
 
 - git
@@ -250,6 +258,26 @@ root 'users#index'
 @users = User.all
 ```
 これに対し、RubyライブラリのActive RecordによってUser.allリクエストに対し、DB上のすべてのユーザーを返すことができる。
+- Usersリソースの欠点:
+- 課題でもあったように、テキトーな名前とかが通ってしまう。また、認証が行われていないなど他にもよくない点がある。
+- REST構造は同じ。リソースに同じように反映されている。
+- modelのとこからvalidatesで指定→文字数制限できる(簡単)
+- 異なるデータモデル同士の関連付けはRailsの強力な機能(ここでは、UserモデルとMicropostモデル)
+- rails console:
+- オブジェクト指向っぽくいける
+- モデルの継承構造
+- User < ApplicationRecord < ActiveRecord::Base
+- Micropost < ApplicationRecord < ActiveRecord::Base
+- ActiveRecord::Baseは、RailsのActive Recordというライブラリが提供しているコントローラの基本クラス
+- コントローラの継承構造
+- UsersController < ApplicationController < ActionController::Base
+- MicropostsController < ApplicationController < ActionController::Base
+- ActionController::BaseはRailsのAction Packというライブラリが提供しているコントローラの基本クラス
+- まとめ
+- RailsのRESTには、URLセット、コントローラアクションが含まれる
+- dataのvalidationで、データモデルの属性の値に制限をかけられる
+- 組み込み関数が多い
+- コンソールをつかうとコマンドラインから扱えてちょっと確かめる分にはいちいちGUIやんなくていいので楽
 
 ## 演習
 1.User Createで文字のCSS
@@ -280,3 +308,47 @@ end
 3.editページ
 - views/users/edit.html.erb
 
+1.p#noticeの挙動
+- リロードで消える
+
+2.空作成
+- できる
+
+3.141文字以上のマイクロポスト
+- できる
+
+4.削除: やる
+
+1.制限後のふるまい
+- エラーが出る
+
+2.CSSは
+- #error_explanation,#field_with_errorsが出現
+- リロードするとmicroposts/に戻る
+
+1.showページ編集し、ユーザーの最初のマイクロポストを表示
+```
+<p>
+  <strong>Micropost:</strong>
+  <%= @user.microposts.first.content %>
+</p>
+```
+
+2.contentが存在しているか検証
+- やる
+
+3.nameとemailが存在していることを検証
+```
+    validates :name, presence: true
+    validates :email, presence: true
+```
+1.ActionController::base where?
+- app/controllers/application_controller.rb
+
+2.ActiveRecord::Base where?
+- app/models/application_record.rb
+
+# 3章
+
+
+## 演習
