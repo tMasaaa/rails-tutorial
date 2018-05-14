@@ -56,7 +56,13 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - migrateとは？
 - resourceとは？コンポーネントとの違いはなに？(コード化されているということ？): リソースとは、HTTPプロトコル経由で自由にCURDできる、分類されたデータ群のこと。(コンポーネントを扱いやすい形に変換したもの)
 - 本筋ではないが、アドレスバーにURLを入力してどんなプロトコルでどこを通ってroutes.rbが処理するに至るのかその過程が知りたい
-- 
+- HTTPS化はどうやってするのか？
+- 以下の二つの"#"と"/"はどう違うのか？どういうときに#でどういうときに/なのか
+```
+  get 'static_pages/help'
+  root 'application#hello'
+```
+- テストでshared_folder由来のエラーが出るのを解消する
 
 Roadmap
 - hello app(1)
@@ -154,6 +160,16 @@ git push -u origin master
 ```
 git checkout -b <name>
 ```
+
+- test guideline
+- アプリケーションのコードよりテストコードのほうが短くシンプル→先にテストを書く
+- 仕様がまだ→後でテストを書く
+- セキュリティ周りのエラー、課題→先にテスト
+- バグを見つけたら→先にテスト
+- HTMLなど、すぐ変更しそうなコード→後でテスト
+- リファクタリングする→先にテスト
+> 現実的には、最初にコントローラ、モデルのテスト→統合テスト(モデル/ビュー/コントローラにまたがる機能テスト)を書く。
+> 統合テストはユーザーがwebブラウザでやり取りする操作をシュミレートできる
 
 # 1章
 - ハードスキル(操作方法:定型的)、ソフトスキル(デバッグ:定型化しにくい)の両方が必要。
@@ -377,7 +393,132 @@ end
 - まずdef helloとかして確かめるのが大事。
 - ずっとmasterブランチではなく、その都度topicブランチで作業するのが良い習慣。
 - rails generate では、コントローラ名とアクション名を決められる
+- controller内のgetはHTTPのgetと結びついている。
+```
+get 'static_pages/help'
+```
+- RailsはHTTPの4つの操作(GET/POST/PATCH/DELETE)に対応している。PATCH,DELETEはサーバー上の操作に対応していて、ブラウザがネイティブには対応していない。しかし。Railsはこれらのリクエストを送信しているかのように見せかける技術を使って、PATCH,DELETEをサポートできるようになった。
+- RESTはあらゆるものに対して最適ではない(ref.静的なページの集合)
+- 下のコードはRubyだと何も実行しないメソッド。しかしRailsでは、継承によりデフォルトの動作が決まっている。def以下実行→ビューを出力という流れなので、今回はhome.html.erbビューが出力されるだけとなる。
+```
+  def home
+  end
+```
+- まとめ: ブラウザがURLでGETリクエストを送る→routes.rbが受け取り、URLに対応するcontrollerが、def以下のメソッド実行し、その後ビューを出力。ブラウザにhtmlが表示される。
+- テストから始める
+- 変更を行うときは「自動化テスト」を作成しよう
+- テスト作成が上達すれば、バグを追う時間が減る→全体でみると、開発速度が上がる。
+- テストには時間がかかる
+- Springサーバーを起動してRails環境を事前読み込みするのに時間がかかる
+- Rubyそのものの起動に時間がかかる
+- テスト失敗をRED, 成功をGREENと表す
+- まずAboutページ用に失敗するテストを書く→RED→Aboutページを書く→GREEN
+- [error] rails test で`3 runs, 2 assertions, 0 failures, 1 errors, 0 skips`が出てこない
+- rails test -dで出てくる
+- 謎のエラーが出る(guestとhostでファイル共有しているのが原因？)
+```
+[vagrant@localhost sample_app]$ rails test -d
+Running via Spring preloader in process 14913
+rails aborted!
+ActiveRecord::Tasks::DatabaseAlreadyExists: ActiveRecord::Tasks::DatabaseAlreadyExists
+/home/vagrant/rails-tutorial/project/sample_app/bin/rails:9:in `require'
+/home/vagrant/rails-tutorial/project/sample_app/bin/rails:9:in `<top (required)>'
+/home/vagrant/rails-tutorial/project/sample_app/bin/spring:15:in `require'
+/home/vagrant/rails-tutorial/project/sample_app/bin/spring:15:in `<top (required)>'
+bin/rails:3:in `load'
+bin/rails:3:in `<main>'
 
+Caused by:
+Errno::ETXTBSY: Text file busy @ apply2files - /home/vagrant/rails-tutorial/project/sample_app/db/test.sqlite3
+/home/vagrant/rails-tutorial/project/sample_app/bin/rails:9:in `require'
+/home/vagrant/rails-tutorial/project/sample_app/bin/rails:9:in `<top (required)>'
+/home/vagrant/rails-tutorial/project/sample_app/bin/spring:15:in `require'
+/home/vagrant/rails-tutorial/project/sample_app/bin/spring:15:in `<top (required)>'
+bin/rails:3:in `load'
+bin/rails:3:in `<main>'
+Tasks: TOP => db:test:load => db:test:purge
+(See full trace by running task with --trace)
+Run options: -d --seed 49899
+
+# Running:
+
+Run options: -d --seed 49899
+
+# Running:
+
+..EE..
+
+Finished in 3.358941s, 0.8931 runs/s, 0.5954 assertions/s.
+
+  1) Error:
+StaticPagesControllerTest#test_should_get_about:
+NameError: undefined local variable or method `static_pages_about_url' for #<StaticPagesControllerTest:0x00007f2f77e33db8>
+    test/controllers/static_pages_controller_test.rb:15:in `block in <class:StaticPagesControllerTest>'
+
+3 runs, 2 assertions, 0 failures, 1 errors, 0 skips
+
+
+
+Finished in 3.603273s, 0.8326 runs/s, 0.5551 assertions/s.
+
+  1) Error:
+StaticPagesControllerTest#test_should_get_about:
+NameError: undefined local variable or method `static_pages_about_url' for #<StaticPagesControllerTest:0x00007f2f77e33db8>
+    test/controllers/static_pages_controller_test.rb:15:in `block in <class:StaticPagesControllerTest>'
+
+3 runs, 2 assertions, 0 failures, 1 errors, 0 skips
+
+Failed tests:
+
+Traceback (most recent call last):
+        18: from -e:1:in `<main>'
+        17: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/2.5.0/rubygems/core_ext/kernel_require.rb:59:in `require'
+        16: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/2.5.0/rubygems/core_ext/kernel_require.rb:59:in `require'
+        15: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/spring-2.0.2/lib/spring/application/boot.rb:19:in `<top (required)>'
+        14: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/spring-2.0.2/lib/spring/application.rb:135:in `run'
+        13: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/spring-2.0.2/lib/spring/application.rb:135:in `loop'
+        12: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/spring-2.0.2/lib/spring/application.rb:141:in `block in run'
+        11: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/spring-2.0.2/lib/spring/application.rb:171:in `serve'
+        10: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/spring-2.0.2/lib/spring/application.rb:171:in `fork'
+         9: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/minitest-5.11.3/lib/minitest.rb:63:in `block in autorun'
+         8: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/minitest-5.11.3/lib/minitest.rb:141:in `run'
+         7: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/minitest-5.11.3/lib/minitest.rb:808:in `report'
+         6: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/minitest-5.11.3/lib/minitest.rb:808:in `each'
+         5: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/railties-5.1.4/lib/rails/test_unit/reporter.rb:37:in `report'
+         4: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/railties-5.1.4/lib/rails/test_unit/reporter.rb:41:in `aggregated_results'
+         3: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/railties-5.1.4/lib/rails/test_unit/reporter.rb:41:in `map'
+         2: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/railties-5.1.4/lib/rails/test_unit/reporter.rb:41:in `block in aggregated_results'
+         1: from /home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/railties-5.1.4/lib/rails/test_unit/reporter.rb:70:in `format_rerun_snippet'
+/home/vagrant/.anyenv/envs/rbenv/versions/2.5.0/lib/ruby/gems/2.5.0/gems/railties-5.1.4/lib/rails/test_unit/reporter.rb:70:in `method': undefined method `test_should_get_about' for class `Minitest::Result' (NameError)
+```
+- 次のRED
+```
+  1) Error:
+StaticPagesControllerTest#test_should_get_about:
+AbstractController::ActionNotFound: The action 'about' could not be found for StaticPagesController
+    test/controllers/static_pages_controller_test.rb:15:in `block in <class:StaticPagesControllerTest>'
+
+3 runs, 2 assertions, 0 failures, 1 errors, 0 skips
+```
+- 次のRED
+- template(ビューのこと)がないよ
+```
+  1) Error:
+StaticPagesControllerTest#test_should_get_about:
+ActionController::UnknownFormat: StaticPagesController#about is missing a template for this request format and variant.
+
+request.formats: ["text/html"]
+request.variant: []
+
+NOTE! For XHR/Ajax or API requests, this action would normally respond with 204 No Content: an empty white screen. Since you're loading it in a web browser, we assume that you expected to actually render a template, not nothing, so we're showing an error to be extra-clear. If you expect 204 No Content, carry on. That's what you'll get from an XHR or API request. Give it a shot.
+    test/controllers/static_pages_controller_test.rb:15:in `block in <class:StaticPagesControllerTest>'
+
+3 runs, 2 assertions, 0 failures, 1 errors, 0 skips
+```
+- GREEN
+```
+3 runs, 3 assertions, 0 failures, 0 errors, 0 skips
+```
 
 ## 演習
 1.README
