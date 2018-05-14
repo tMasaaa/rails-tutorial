@@ -65,6 +65,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 ```
 - テストでshared_folder由来のエラーが出るのを解消する
 - 使い方がわかるが、仕組みがわからない状態になっているので何がわからないのかわからない。エラーに遭遇して調べて少しずつ知っていくのだろうか？
+- Guardファイルの中身解読
 
 Roadmap
 - hello app(1)
@@ -552,7 +553,24 @@ end
 ```
 3 runs, 6 assertions, 0 failures, 0 errors, 0 skips
 ```
-
+- テスト用設定
+  - minitest reporters
+  - 色付きにしてくれる
+- Guardによる自動化
+  - ファイル変更時に自動的にテストを走らせる。
+- initする
+```
+[vagrant@localhost sample_app]$ bundle exec guard init
+05:51:19 - INFO - Writing new Guardfile to /home/vagrant/rails-tutorial/project/sample_app/Guardfile
+05:51:20 - INFO - minitest guard added to Guardfile, feel free to edit it
+```
+- Guardファイルの変更
+- コピペした。その中の一文
+```
+guard :minitest, spring: "bin/rails test", all_on_start: false do
+```
+- Springサーバ(railsの機能)を使って読み込み時間を短縮する。
+- Springは若干不安定なので、テストが遅いなと感じたらSpringをkillする。
 
 ## 演習
 1.README

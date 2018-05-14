@@ -1,5 +1,4 @@
 #########################
-<<<<<<< HEAD
 ### sample_app ###
 # ignore bundle
 /project/sample_app/.bundle
@@ -18,10 +17,10 @@
 /project/sample_app/yarn-error.log
 
 /project/sample_app/.byebug_history
+# Ignore Spring files.
+/project/sample_app/spring/*.pid
 
 #########################
-=======
->>>>>>> 4330fd317cebc212b07650084918070153b66527
 ### blog ###
 # ignore bundle
 /project/blog/.bundle
