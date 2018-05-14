@@ -174,6 +174,13 @@ git checkout -b <name>
 > 現実的には、最初にコントローラ、モデルのテスト→統合テスト(モデル/ビュー/コントローラにまたがる機能テスト)を書く。
 > 統合テストはユーザーがwebブラウザでやり取りする操作をシュミレートできる
 
+- Unixのプロセス
+- `ps aux` : システム上で動いているプロセスの確認
+- `ps aux | grep spring` : spring関連のを表示
+- `kill [killcode] [pid]` : プロセスのkill
+- `spring stop` : springプロセスを停止
+- `pkill -15 -f spring` : 一括
+
 # 1章
 - ハードスキル(操作方法:定型的)、ソフトスキル(デバッグ:定型化しにくい)の両方が必要。
 - scaffoldは便利だけど、それだけに頼っていては実力がつかないのでsample appでは使わない。
@@ -571,6 +578,15 @@ guard :minitest, spring: "bin/rails test", all_on_start: false do
 ```
 - Springサーバ(railsの機能)を使って読み込み時間を短縮する。
 - Springは若干不安定なので、テストが遅いなと感じたらSpringをkillする。
+
+- 2つteraterm立ち上げて、片方がGuard用、片方が開発用にする。
+```
+[vagrant@localhost sample_app]$ bundle exec guard
+06:00:57 - INFO - Guard::Minitest 2.4.4 is running, with Minitest::Unit 5.11.3!
+06:01:01 - INFO - Guard is now watching at '/home/vagrant/rails-tutorial/project/sample_app'
+[1] guard(main)>
+```
+- Ctrl+Dで終了
 
 ## 演習
 1.README
