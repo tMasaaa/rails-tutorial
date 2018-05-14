@@ -9,6 +9,7 @@
 - マイグレーション
 - ルーティング
 - ERB
+  - Embedded Ruby 埋め込みRuby
 - モックアップ
 - テスト駆動開発TDD
 - 統合テスト
@@ -63,6 +64,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
   root 'application#hello'
 ```
 - テストでshared_folder由来のエラーが出るのを解消する
+- 使い方がわかるが、仕組みがわからない状態になっているので何がわからないのかわからない。エラーに遭遇して調べて少しずつ知っていくのだろうか？
 
 Roadmap
 - hello app(1)
@@ -519,6 +521,38 @@ NOTE! For XHR/Ajax or API requests, this action would normally respond with 204 
 ```
 3 runs, 3 assertions, 0 failures, 0 errors, 0 skips
 ```
+- リファクタリングの習慣は早めにつけておいたほうがよい。
+- error(RED): 前の、謎エラーは出るけどともかくテストスイートはREDになった。
+```
+3 runs, 6 assertions, 3 failures, 0 errors, 0 skips
+```
+- html.erb変更して`rails test -d`
+```
+3 runs, 6 assertions, 0 failures, 0 errors, 0 skips
+```
+- テストの共通化: 各テストが実行される直前で実行されるメソッド、setupを使う
+```
+def setup
+  @hoge="hogehoge"
+end
+```
+- レイアウトの共通化
+```
+<% provide(:title, "Home) %>
+```
+- Railsのprovideメソッドを呼び出し。
+- <% %>はコード実行、出力なし。
+- <%= %>はコード実行、出力がテンプレート(ビュー)に挿入される。
+- 実行
+```
+3 runs, 6 assertions, 0 failures, 0 errors, 0 skips
+```
+- ERBでも問題なくテストをパス。残りの二つもERBにして、それも問題なくパス。
+- ERBに加え、layoutを活用して同じ構造をまとめた。これもパス。
+```
+3 runs, 6 assertions, 0 failures, 0 errors, 0 skips
+```
+
 
 ## 演習
 1.README
@@ -527,3 +561,26 @@ NOTE! For XHR/Ajax or API requests, this action would normally respond with 204 
 2.Heroku
 - とばす
 
+1.Contact
+- まずテストの作成
+- テスト走らせる
+```
+4 runs, 6 assertions, 0 failures, 1 errors, 0 skips
+```
+- routes.rb, contact.html.erbの生成
+```
+4 runs, 8 assertions, 0 failures, 0 errors, 0 skips
+```
+- テストをパス。完了。
+
+1.rootルーティングのテスト
+- rootのテストを書いて、rootコメントアウトして走らせる
+```
+5 runs, 8 assertions, 0 failures, 1 errors, 0 skips
+```
+- OK, error出てる。
+- コメントアウトを戻して、テスト
+```
+5 runs, 9 assertions, 0 failures, 0 errors, 0 skips
+```
+- パスした。
