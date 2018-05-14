@@ -66,6 +66,17 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - テストでshared_folder由来のエラーが出るのを解消する
 - 使い方がわかるが、仕組みがわからない状態になっているので何がわからないのかわからない。エラーに遭遇して調べて少しずつ知っていくのだろうか？
 - Guardファイルの中身解読
+- 「Railsの組み込み関数」「かっこを使わないメソッド呼び出し」「シンボル」「ハッシュ」
+- モジュール
+- メソッド定義
+- 任意のメソッド引数
+- コメント
+- ローカル変数の割り当て
+- 論理値
+- 制御フロー
+- 文字列の結合
+- 戻り値
+- interactive rubyとは？どういう仕組みでインタラクティブになっているんだ
 
 Roadmap
 - hello app(1)
@@ -79,6 +90,10 @@ Roadmap
 困ったときは？
 - https://railsguides.jp/ Railsガイド
 - https://railstutorial.jp/help Help
+- http://ruby-doc.org/ API
+- https://docs.ruby-lang.org/ja/ ja API
+- https://docs.ruby-lang.org/ja/search/ search ja
+
 
 Unixコマンド
 - ls -a: dotfile含めて表示
@@ -618,3 +633,270 @@ guard :minitest, spring: "bin/rails test", all_on_start: false do
 5 runs, 9 assertions, 0 failures, 0 errors, 0 skips
 ```
 - パスした。
+
+# 4章
+- Rubyについて学ぶ
+- stylesheet_link_tagを使って、application.cssをすべてのメディアタイプで使えるようにしている。
+```
+<%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+```
+- ここには、「Railsの組み込み関数」「かっこを使わないメソッド呼び出し」「シンボル」「ハッシュ」が含まれる
+- 組み込み関数以外に、新しくメソッドを作ることができる(カスタムヘルパー)
+- カスタムヘルパーを作り、テストする
+```
+5 tests, 9 assertions, 1 failures, 0 errors, 0 skips
+```
+- homeのprovideを消去
+```
+5 tests, 9 assertions, 0 failures, 0 errors, 0 skips
+```
+- 文字列とメソッド
+- rails consoleを使う。
+- railsコンソールはirb(Interactive RuBy)の拡張。
+- `rails console`を使う
+```
+[vagrant@localhost sample_app]$ rails console
+Running via Spring preloader in process 15085
+Loading development environment (Rails 5.1.4)
+irb(main):001:0>
+```
+- `"#{name}"`で変数を文字列に埋め込み
+- `'#{name}'`では展開できない
+- 逆に、\nを表したい！→`'\n'`で表示できる(エスケープされない)
+- nil
+```
+nil.to_s # ""
+nil.nil? # true
+nil.to_s.nil? #false
+!!nil # false
+!!false # false
+!!0 # true
+```
+- puts if
+```
+puts "Yes" if x.empty?
+```
+- メソッドの定義
+- defでできる。デフォルト引数を決められる
+```
+irb(main):034:0> def string_message(str='')
+irb(main):035:1>   if str.empty?
+irb(main):036:2>     "empty"
+irb(main):037:2>   else
+irb(main):038:2>     "nonempty"
+irb(main):039:2>   end
+irb(main):040:1> end
+=> :string_message
+irb(main):041:0> puts string_message("of")
+nonempty
+=> nil
+irb(main):042:0> puts string_message
+empty
+=> nil
+```
+- full_titleメソッド
+```
+module ApplicationHelper
+
+  # ページごとの完全なタイトルを返します。                   # コメント行
+  def full_title(page_title = '')                     # メソッド定義とオプション引数
+    base_title = "Ruby on Rails Tutorial Sample App"  # 変数への代入
+    if page_title.empty?                              # 論理値テスト
+      base_title                                      # 暗黙の戻り値
+    else 
+      page_title + " | " + base_title                 # 文字列の結合
+    end
+  end
+end
+```
+- module includeメソッドを使ってmoduleを読み込むことができる。(mixed in)
+- full_titleはrailsの機能により自動的にヘルパーモジュールが読み込まれるため、includeせずにすべてのビューで使用可能になっている。
+- データ構造
+- 配列: 添え字はマイナスもOK
+```
+irb(main):001:0> "f a h".split
+=> ["f", "a", "h"]
+irb(main):002:0> "gxhxjxk".split('x')
+=> ["g", "h", "j", "k"]
+irb(main):003:0> a = [1,2,3]
+=> [1, 2, 3]
+irb(main):004:0> a[1]
+=> 2
+irb(main):005:0> a[-1]
+=> 3
+irb(main):006:0> a.last==a[-1]
+=> true
+irb(main):007:0> a
+=> [1, 2, 3]
+irb(main):008:0> a.empty?
+=> false
+irb(main):009:0> a.include(2)?
+irb(main):010:0*
+irb(main):011:0* ^C
+irb(main):011:0> a.include?(2)
+=> true
+irb(main):012:0> a.sort
+=> [1, 2, 3]
+irb(main):013:0> a.reverse
+=> [3, 2, 1]
+irb(main):014:0> a.shuffle
+=> [2, 3, 1]
+irb(main):015:0> a
+=> [1, 2, 3]
+```
+- 破壊的メソッド
+```
+irb(main):018:0> a.reverse!
+=> [3, 2, 1]
+irb(main):019:0> a
+=> [3, 2, 1]
+```
+- 追加
+```
+irb(main):020:0> a.push(2)
+=> [3, 2, 1, 2]
+irb(main):021:0> a<<"foo"
+=> [3, 2, 1, 2, "foo"]
+```
+- 結合
+```
+irb(main):022:0> a.join
+=> "3212foo"
+irb(main):023:0> a
+=> [3, 2, 1, 2, "foo"]
+irb(main):024:0> a.join('/')
+=> "3/2/1/2/foo"
+```
+- range
+```
+irb(main):025:0> (0..100).to_a
+=> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100]
+irb(main):026:0> b = %w[a b c d]
+=> ["a", "b", "c", "d"]
+irb(main):028:0> b[0..2]
+=> ["a", "b", "c"]
+```
+- a[0..-1]ですべてを指定できる
+- ブロック
+```
+(1..5).each { |i| puts 2 * i }
+```
+
+
+
+## 演習
+1.2.3.4.変数とクォーテーションの違い
+```
+irb(main):008:0> city = "heroku"
+=> "heroku"
+irb(main):009:0> prefecture = "barr"
+=> "barr"
+irb(main):010:0> puts "#{prefecture}県 #{city}町"
+barr県 heroku町
+=> nil
+irb(main):011:0> puts "#{prefecture}県\t#{city}町"
+barr県  heroku町
+=> nil
+irb(main):012:0> puts '#{prefecture}県\t#{city}町'
+#{prefecture}県\t#{city}町
+=> nil
+```
+1.2.3.4.回文
+```
+irb(main):027:0> "racecar".length
+=> 7
+irb(main):028:0> "racecar".reverse
+=> "racecar"
+irb(main):029:0> s = "racecar"
+=> "racecar"
+irb(main):030:0> s == s.reverse
+=> true
+irb(main):031:0> puts "It's a palindrome!" if s == s.reverse
+It's a palindrome!
+=> nil
+irb(main):032:0> s = "onomatopia"
+=> "onomatopia"
+irb(main):033:0> puts "It's a palindrome!" if s == s.reverse
+=> nil
+```
+1.2.3.メソッド定義
+```
+irb(main):043:0> def paindrome_tester(s)
+irb(main):044:1>   if s == s.reverse
+irb(main):045:2>
+Display all 512 possibilities? (y or n)
+irb(main):045:2>
+irb(main):046:2>     puts "p"
+irb(main):047:2>   else
+irb(main):048:2>     puts "np"
+irb(main):049:2>   end
+irb(main):050:1> end
+=> :paindrome_tester
+irb(main):051:0> paindrome_tester("racecar")
+p
+=> nil
+irb(main):052:0> paindrome_tester("onomatopoeia")
+np
+=> nil
+irb(main):053:0> paindrome_tester("racecar").nil?
+p
+=> true
+```
+1.2.3.4.配列
+```
+irb(main):030:0> "A man,a plan,a canal,Panama".split(',')
+=> ["A man", "a plan", "a canal", "Panama"]
+irb(main):031:0> a = "A man,a plan,a canal,Panama".split(',')
+=> ["A man", "a plan", "a canal", "Panama"]
+irb(main):032:0> a
+=> ["A man", "a plan", "a canal", "Panama"]
+irb(main):033:0> s=a.join
+=> "A mana plana canalPanama"
+irb(main):034:0> s.split.join
+=> "AmanaplanacanalPanama"
+irb(main):035:0> def p(s)
+irb(main):036:1>   if s==s.reverse
+irb(main):037:2>     puts "p"
+irb(main):038:2>   else
+irb(main):039:2>     puts "nonp"
+irb(main):040:2>   end
+irb(main):041:1> end
+=> :p
+irb(main):042:0> s
+=> "A mana plana canalPanama"
+irb(main):043:0> s.split.join!
+Traceback (most recent call last):
+        1: from (irb):43
+NoMethodError (undefined method `join!' for ["A", "mana", "plana", "canalPanama"]:Array
+Did you mean?  join)
+irb(main):044:0> s
+=> "A mana plana canalPanama"
+irb(main):045:0> s.split.join
+=> "AmanaplanacanalPanama"
+irb(main):046:0> s.split.join.p
+Traceback (most recent call last):
+        2: from (irb):46
+        1: from (irb):35:in `p'
+ArgumentError (wrong number of arguments (given 0, expected 1))
+irb(main):047:0> s.split.join.downcase.p
+Traceback (most recent call last):
+        2: from (irb):47
+        1: from (irb):35:in `p'
+ArgumentError (wrong number of arguments (given 0, expected 1))
+irb(main):048:0> s = s.split.join
+=> "AmanaplanacanalPanama"
+irb(main):049:0> s
+=> "AmanaplanacanalPanama"
+irb(main):050:0> s.downcase.p
+Traceback (most recent call last):
+        2: from (irb):50
+        1: from (irb):35:in `p'
+ArgumentError (wrong number of arguments (given 0, expected 1))
+irb(main):051:0> p(s.downcase)
+p
+=> nil
+irb(main):052:0> ("a".."z").to_a[6]
+=> "g"
+irb(main):053:0> ("a".."z").to_a[-7]
+=> "t"
+```
