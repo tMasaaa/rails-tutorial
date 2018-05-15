@@ -1,4 +1,9 @@
 # note
+理解度
+- 4.3.4 A
+- 4.4 S
+- 4.4.5 D
+
 理解度確認、疑問
 - Ruby gemの選定方法
 - bundle install, bundle updateの実行方法
@@ -77,6 +82,9 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - 文字列の結合
 - 戻り値
 - interactive rubyとは？どういう仕組みでインタラクティブになっているんだ
+- hashを複数宣言しよう！→`a={},b={},c={}`,区切りはRubyでは配列になってしまう。hashを複数宣言するには改行するしかないのかな…？もしかして: 空白を開ける
+- `s = String.new("foobar")`これ、foobarの""で暗黙のリテラルコンストラクタが呼ばれているのか？Stringオブジェクトを生成して、newはいったい何をしているのか？それともこの場合の""はコンストラクタではない？？
+- Rubyってプロトタイプベースじゃないよね？？プロトタイプベースとクラスベースの違いが分からなくなってきた…(一度JSで理解したので復習しないと)
 
 Roadmap
 - hello app(1)
@@ -777,11 +785,135 @@ irb(main):028:0> b[0..2]
 => ["a", "b", "c"]
 ```
 - a[0..-1]ですべてを指定できる
-- ブロック
+- ブロック:eachメソッド(それぞれに対応する処理)mapメソッド(配列を新しく生み出す処理)
 ```
 (1..5).each { |i| puts 2 * i }
-```
 
+(1..5).each do |i|
+  puts 3*i
+end
+```
+- ハッシュ: 連想配列`{"a"=>"b", "x"=>"y"}`
+- シンボル: `:name`
+- ハッシュ`{:a => "b", :x => "y"}`
+- 未定義のハッシュ値は`nil`
+- `{:a => "b", :x => "y"} == {a:"b", x:"y"} # true`
+- JSのJSON的な書き方ができる(キーはシンボルであることに注意)
+```
+irb(main):001:0> flash = {success: "worked", danger: "failed"}
+
+=> {:success=>"worked", :danger=>"failed"}
+irb(main):002:0> flash.each do |key, value|
+irb(main):003:1*   puts "key #{key.inspect} has value #{value.inspect}"
+irb(main):004:1> end
+key :success has value "worked"
+key :danger has value "failed"
+=> {:success=>"worked", :danger=>"failed"}
+```
+- Rubyでは、丸かっこはなくてもよい。さらに、メソッド呼び出しの最後の引数のハッシュは波かっこを省略できる
+- 次の二つはどちらも合法で、同じ。
+```
+a1('x1', {y1: 'z1', 'w-r': 'z2'})
+a1 'x1', y1: 'z1', 'w-r':'z2'
+```
+- Rubyは改行と空白を区別していない
+- コンストラクタのとこ、すごくjavascriptっぽい
+- コンストラクタ: インスタンスを生成したタイミングで実行されるメソッドのこと。メソッド(関数)なのでオブジェクトではない。
+- インスタンス: 値。クラスの実体化したもの。これはオブジェクト。
+- `""`は文字列(Stringクラス)のインスタンスを作成するコンストラクタ。
+- `String.new()` `Array.new()`JSっぽくやれる。
+- 注意: ハッシュは少し違う
+- `Hash.new`はデフォルト値がnilなので、範囲外キーに対応するのは`nil` `Hash.new(10)`とすると、範囲外キーに対応するのが`10`になる。
+- `Class.method`の形で呼び出されるメソッドをクラスメソッドという。`Class.new()`はそのクラスのオブジェクトなので、クラスのインスタンスという。
+- それに対し、`hoge.length`のlengthのようにインスタンスに対して呼び出されるメソッドをインスタンスメソッドという。
+- クラス継承
+- `superclass`メソッドでたどっていける(JSと同じ。nilに行き着くのも同じ。)
+- nil->BasicObject->Object->String
+- 自作すると、自作クラス < Objectになってる
+```
+irb(main):032:0> class Wordd
+irb(main):033:1>   def p
+irb(main):034:2>     puts 1
+irb(main):035:2>   end
+irb(main):036:1> end
+=> :p
+irb(main):037:0> w=Wordd.new
+=> #<Wordd:0x00007f913de7eac0>
+irb(main):038:0> w.p
+1
+=> nil
+irb(main):039:0> w.superclass
+Traceback (most recent call last):
+        1: from (irb):39
+NoMethodError (undefined method `superclass' for #<Wordd:0x00007f913de7eac0>)
+irb(main):040:0> w.class
+=> Wordd
+irb(main):041:0> w.class.superclass
+=> Object
+```
+- Stringを継承
+```
+irb(main):042:0> class Word < String
+irb(main):043:1>   def p?
+irb(main):044:2>     self == self.reverse
+irb(main):045:2>   end
+irb(main):046:1> end
+=> :p?
+irb(main):047:0> s=Word.new("hogegoh")
+=> "hogegoh"
+irb(main):048:0> s.p?
+=> true
+irb(main):049:0> s.length
+=> 7
+```
+- `self==reverse`のように、selfを省略してもよい
+- classはCamelCase。_はつかってはいけない
+- 組み込みクラスの変更
+- Stringに新しくメソッドを追加する
+- 普通はダメだけど、railsは組み込みクラスを変更している(もちろん正当な理由があってのこと)
+- `blank?`メソッド
+- StaticPagesController
+```
+irb(main):040:0> con=StaticPagesController.new
+=> #<StaticPagesController:0x00007fc858d40828 @_action_has_layout=true, @_routes=nil, @_request=nil, @_response=nil>
+irb(main):041:0> con.class
+=> StaticPagesController
+irb(main):042:0> con.class.superclass
+=> ApplicationController
+irb(main):043:0> con.class.superclass.superclass
+=> ActionController::Base
+irb(main):044:0> con.class.superclass.superclass.superclass
+=> ActionController::Metal
+irb(main):045:0> con.class.superclass.superclass.superclass.superclass
+=> AbstractController::Base
+irb(main):046:0> con.class.superclass.superclass.superclass.superclass.superclass
+=> Object
+irb(main):047:0> con.class.superclass.superclass.superclass.superclass.superclass.superclass
+=> BasicObject
+irb(main):048:0> con.class.superclass.superclass.superclass.superclass.superclass.superclass.superclass
+=> nil
+```
+- Railsのアクションには戻り値がない。
+- newしなくてもインスタンスが作成されている→Railsはrubyと別物
+- `attr_accessor :name, :email`
+  - attributeとaccessorの作成。
+  - アクセサーを作成すると、getterとsetterが定義される→インスタンス変数@name,@emailにアクセスするためのメソッドが用意される。(要はもろもろの宣言)
+- `initialize`
+  - User.newを実行すると自動的に呼び出されるメソッド
+```
+irb(main):001:0> require './example_user'
+=> true
+irb(main):002:0> e = User.new
+=> #<User:0x00007f44e2724e98 @name=nil, @email=nil>
+irb(main):003:0> e.name
+=> nil
+irb(main):004:0> e.name="hiro"
+=> "hiro"
+irb(main):005:0> e.email="a@b.com"
+=> "a@b.com"
+irb(main):006:0> e.formatted_email
+=> "hiro <a@b.com>"
+```
 
 
 ## 演習
@@ -899,4 +1031,231 @@ irb(main):052:0> ("a".."z").to_a[6]
 => "g"
 irb(main):053:0> ("a".."z").to_a[-7]
 => "t"
+```
+1.2.3.4.ブロック
+```
+irb(main):005:0> (0..16).each do |i|
+irb(main):006:1*   puts i**2
+irb(main):007:1> end
+0
+1
+4
+9
+16
+25
+36
+49
+64
+81
+100
+121
+144
+169
+196
+225
+256
+=> 0..16
+irb(main):008:0> def yeller(s)
+irb(main):009:1>   return s.map{|char| char.upcase}.join
+irb(main):010:1> end
+=> :yeller
+irb(main):011:0> yeller(['o', 'l', 'd'])
+=> "OLD"
+irb(main):012:0> def random_subdomain(s)
+irb(main):013:1>   return ('a'..'z').shuffle[0..7].join
+irb(main):014:1> end
+=> :random_subdomain
+irb(main):015:0> random_subdomain
+Traceback (most recent call last):
+        2: from (irb):15
+        1: from (irb):12:in `random_subdomain'
+ArgumentError (wrong number of arguments (given 0, expected 1))
+irb(main):016:0> random_subdomain()
+Traceback (most recent call last):
+        2: from (irb):16
+        1: from (irb):12:in `random_subdomain'
+ArgumentError (wrong number of arguments (given 0, expected 1))
+irb(main):017:0> def random_subdomain()
+irb(main):018:1> end
+=> :random_subdomain
+irb(main):019:0> puts random_subdomain
+
+=> nil
+irb(main):020:0> def random_subdomain()
+irb(main):021:1>   return ('a'..'z').shuffle[0..7].join
+irb(main):022:1> end
+=> :random_subdomain
+irb(main):023:0> puts rand
+rand              random_subdomain
+irb(main):023:0> puts random_subdomain
+Traceback (most recent call last):
+        2: from (irb):23
+        1: from (irb):21:in `random_subdomain'
+NoMethodError (undefined method `shuffle' for "a".."z":Range)
+irb(main):024:0> def random_subdomain()
+irb(main):025:1>   return ('a'..'z').to_a.shuffle[0..7].join
+irb(main):026:1> end
+=> :random_subdomain
+irb(main):027:0> puts random_subdomain
+vbdoipwg
+=> nil
+irb(main):028:0> def string_shuffle(s)
+irb(main):029:1>   s.split('').shuffle.join
+irb(main):030:1> end
+=> :string_shuffle
+irb(main):031:0> string_shuffle("foobar")
+=> "orbofa"
+```
+1.one,two,three
+```
+irb(main):001:0> hash = { 'one'=>'uno', 'two'=>'dos', 'three'=>'tres'}
+=> {"one"=>"uno", "two"=>"dos", "three"=>"tres"}
+irb(main):002:0> hash.each{|key, value| puts "#{key.inspect},#{value.inspect}"}
+"one","uno"
+"two","dos"
+"three","tres"
+=> {"one"=>"uno", "two"=>"dos", "three"=>"tres"}
+```
+2.hash-hash
+```
+irb(main):007:0> person1={:first=>"a1",:last=>"a2"}
+=> {:first=>"a1", :last=>"a2"}
+irb(main):008:0> person2={:first=>"b1",:last=>"b2"}
+=> {:first=>"b1", :last=>"b2"}
+irb(main):009:0> person3={:first=>"c1",:last=>"c2"}
+=> {:first=>"c1", :last=>"c2"}
+irb(main):010:0> params={}
+=> {}
+irb(main):011:0> params[:father]=person1
+=> {:first=>"a1", :last=>"a2"}
+irb(main):012:0> params[:mother]=person2
+=> {:first=>"b1", :last=>"b2"}
+irb(main):013:0> params[:child]=person3
+=> {:first=>"c1", :last=>"c2"}
+irb(main):014:0> params[:father][:first]
+=> "a1"
+```
+3.user
+```
+irb(main):016:0> user[:name]="kaito"
+=> "kaito"
+irb(main):017:0> user[:email]="sample@example.com"
+=> "sample@example.com"
+irb(main):018:0> user[:password_digest] = "qwertyuiopasdfgh"
+=> "qwertyuiopasdfgh"
+irb(main):019:0> user
+=> {:name=>"kaito", :email=>"sample@example.com", :password_digest=>"qwertyuiopasdfgh"}
+```
+4.merge
+- 予想: `{"a"=>100, "b"=>300}`
+```
+irb(main):020:0>   { "a" => 100, "b" => 200 }.merge({ "b" => 300 })
+=> {"a"=>100, "b"=>300}
+```
+1.範囲オブジェクトのリテラルコンストラクタ
+- .. (1..10のように使う)
+2.Rangeとnew
+- Range.new(1,10)
+3.==で比較
+```
+irb(main):029:0> s=1..10
+=> 1..10
+irb(main):030:0> a=Range.new(1,10)
+=> 1..10
+irb(main):031:0> s==a
+=> true
+```
+1.Range, Hash, Symbol
+- Range < Object < BasicObject < nil
+- Hash < Object < BasicObject < nil
+- Symbol < Object < BasicObject < nil
+2.省略記法
+- 確認するだけ
+1.回文
+```
+irb(main):003:0> class String
+irb(main):004:1>   def p
+irb(main):005:2>     self==reverse
+irb(main):006:2>   end
+irb(main):007:1> end
+=> :p
+irb(main):008:0> "deified".p
+=> true
+irb(main):009:0> "racecar".p
+=> true
+irb(main):010:0> "onomatopoeia".p
+=> false
+irb(main):011:0> "Malayalam".downcase.p
+=> true
+```
+2.shuffle
+```
+irb(main):027:0> class String
+irb(main):028:1>   def shuffle3
+irb(main):029:2>     self.split('').shuffle.join
+irb(main):030:2>   end
+irb(main):031:1> end
+=> :shuffle3
+irb(main):032:0> "asdfg".shuffle3
+=> "afsdg"
+irb(main):033:0> "asdfg".shuffle3
+=> "fsgda"
+```
+3.self削除
+```
+irb(main):034:0> class String
+irb(main):035:1>   def shuffle4
+irb(main):036:2>     split('').shuffle.join
+irb(main):037:2>   end
+irb(main):038:1> end
+=> :shuffle4
+irb(main):039:0> "foobar".shuffle4
+=> "raoobf"
+```
+1.2.User(toy_app)
+```
+irb(main):002:0> User.new
+=> #<User id: nil, name: nil, email: nil, created_at: nil, updated_at: nil>
+irb(main):003:0> a=User.new
+=> #<User id: nil, name: nil, email: nil, created_at: nil, updated_at: nil>
+irb(main):004:0> a.class
+=> User(id: integer, name: string, email: string, created_at: datetime, updated_at: datetime)
+irb(main):005:0> a.class.superclasss
+Traceback (most recent call last):
+        1: from (irb):5
+NoMethodError (undefined method `superclasss' for #<Class:0x00007f0808066438>
+Did you mean?  superclass)
+irb(main):006:0> a.class.superclass
+=> ApplicationRecord(abstract)
+irb(main):007:0> a.class.superclass.superclass
+=> ActiveRecord::Base
+irb(main):008:0> a.class.superclass.superclass.superclass
+=> Object
+```
+1.2.3.User
+```
+irb(main):001:0> require './example_user'
+=> true
+irb(main):002:0> u=User.new
+=> #<User:0x00007f44e2918a38 @first_name=nil, @last_name=nil, @email=nil>
+irb(main):003:0> u.first_name="john"
+=> "john"
+irb(main):004:0> u.last_name="kelly"
+=> "kelly"
+irb(main):005:0> u.email="p@p.com"
+=> "p@p.com"
+irb(main):006:0> u.full_name.split==u.alphabetical_name.split(',').reverse ?
+irb(main):007:0* ?
+irb(main):008:0*
+(irb):7: warning: invalid character syntax; use ?\n
+Traceback (most recent call last):
+SyntaxError ((irb):7: syntax error, unexpected '?')
+irb(main):009:0> u.full_name.split==u.alphabetical_name.split(',').reverse
+=> false
+irb(main):010:0> u.full_name.split
+=> ["john", "kelly"]
+irb(main):011:0> u.alphabetical_name.split(',').reverse
+=> [" john", "kelly"]
+irb(main):012:0> u.alphabetical_name.split(', ').reverse
+=> ["john", "kelly"]
 ```
