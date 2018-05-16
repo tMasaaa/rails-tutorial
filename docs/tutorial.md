@@ -92,6 +92,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - HTTPの標準として、リダイレクトの時に完全なURLが要求される→ソースは？
 - `get 'help', to: 'static_pages#help'`これは、`get('help', 'to'=>'static_pages#help')`と同じか？ruby,railsの記法に慣れない…
 - hoge_urlとhoge_pathは組み込みなのか？
+- これいちいちcontrollerとかviewとか更新する必要があってつらいんだけどリスト作ったほうがいいな？
 
 Roadmap
 - hello app(1)
@@ -1357,6 +1358,23 @@ ActionView::Template::Error: undefined local variable or method `about_path' for
 - getルールを使ってルーティングを決める。testもルーティングの書き方を新しくする。
 - `4 tests, 8 assertions, 0 failures, 0 errors, 0 skips`
 - うまくいった…hoge_pathもhoge_urlと同じく組み込みっぽいな？
+- routes.rbでhoge_pathが使えるようになった。→layoutのlink_toでhoge_pathが使えるようになった。
+- リンクがちゃんと機能しているか調べる。
+- すべてのリンクをポチポチ調べるのではなく統合テストを使って自動化する。
+- 目的
+  - HTML構造を調べて、レイアウトの各リンクが正しく動くか確認すること。
+  - URLにGETリクエスト
+  - 正しいページテンプレートが描画されてるか
+  - その他のページも同様に調べる
+- `assert_select`は強い。けど、複雑なことはしないほうがよい。
+- `assert_select "a[href=?]", '/hoge'`は、`<a href="/hoge"></a>`を指す。
+- `rails test:integration`が統合テスト。
+- `1 tests, 5 assertions, 0 failures, 0 errors, 0 skips`
+- 統合テスト通った。
+- 全てのテストを流す。
+- `5 tests, 13 assertions, 0 failures, 0 errors, 0 skips`GREEN
+- User Sign up pageを作る
+- ルーティングをやってきたけど、これからはアプリケーションの肉付け(認証など)をやっていくよ。 
 
 ## 演習
 1.2.3.猫
@@ -1492,4 +1510,77 @@ get helf_path
 ```
 4 tests, 8 assertions, 0 failures, 0 errors, 0 skips
 ```
-GREEN
+- GREEN
+1.2.helf
+- 確かめるだけ。特になし。
+1.2.変更、full_title
+- Errorはいた
+```
+Failure:
+SiteLayoutTest#test_layout_links [/home/vagrant/rails-tutorial/project/sample_app/test/integration/site_layout_test.rb:10]:
+Expected at least 1 element matching "a[href="/about"]", found 0..
+Expected 0 to be >= 1.
+```
+- full_title helperのテスト
+- FILL_INわからない
+```
+require 'test_helper'
+
+class ApplicationHelperTest < ActionView::TestCase
+    test "full title helper" do
+        assert_equal full_title, "Ruby on Rails Tutorial Sample App"
+        assert_equal full_title("Help"), "Help | Ruby on Rails Tutorial Sample App"
+    end
+end
+```
+1.2.signup RED
+```
+7 tests, 17 assertions, 0 failures, 0 errors, 0 skips
+```
+次の章の内容を先取りしていたのでGREENになった
+1.2.3.テスト
+```
+7 tests, 17 assertions, 0 failures, 0 errors, 0 skips
+```
+- コメントアウト
+```
+7 tests, 8 assertions, 0 failures, 3 errors, 0 skips
+```
+- RED
+```
+require 'test_helper'
+
+class SiteLayoutTest < ActionDispatch::IntegrationTest
+  
+  test "layout links" do
+    get root_path
+    assert_template 'static_pages/home'
+    assert_select "a[href=?]", root_path, count: 2
+    assert_select "a[href=?]", help_path
+    assert_select "a[href=?]", about_path
+    assert_select "a[href=?]", contact_path
+    assert_select "a[href=?]", signup_path
+    get contact_path
+    assert_select "title", full_title("Contact")
+    get signup_path
+    assert_select "title", full_title("Sign up")
+  end
+end
+```
+- これでRED
+```
+7 tests, 8 assertions, 0 failures, 3 errors, 0 skips
+```
+- homepageのリンクのテストと、内容のテストを行った。
+```
+Error:
+SiteLayoutTest#test_layout_links:
+ActionView::Template::Error: undefined local variable or method `signup_path' for #<#<Class:0x00007f2a36231650>:0x00007f2a36220670>
+    app/views/static_pages/home.html.erb:9:in `_app_views_static_pages_home_html_erb__3082552532222737662_69909636814120'
+    test/integration/site_layout_test.rb:6:in `block in <class:SiteLayoutTest>
+```
+- はいーtypoー。sig nupてしてた。signup_pathを定めてるroutes.rbがおかしいと思って探せたのはよかった。
+```
+1 tests, 8 assertions, 0 failures, 0 errors, 0 skips
+```
+- GREEN
