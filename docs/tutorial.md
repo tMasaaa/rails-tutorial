@@ -1,8 +1,6 @@
 # note
 理解度
-- 4.3.4 A
-- 4.4 S
-- 4.4.5 D
+5.2.1 C
 
 理解度確認、疑問
 - Ruby gemの選定方法
@@ -82,9 +80,18 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - 文字列の結合
 - 戻り値
 - interactive rubyとは？どういう仕組みでインタラクティブになっているんだ
-- hashを複数宣言しよう！→`a={},b={},c={}`,区切りはRubyでは配列になってしまう。hashを複数宣言するには改行するしかないのかな…？もしかして: 空白を開ける
+- hashを複数宣言しよう！→`a={},b={},c={}`,区切りはRubyでは配列になってしまう。hashを複数宣言するには改行するしかないのかな…？
+  - `a={} b={} c={}`これはシンタックスエラーになる。
+  - `a,b,c={},{},{}`が正解。
+  - `a={};b={};c={}`も正解。`;`で文を区切れる。
 - `s = String.new("foobar")`これ、foobarの""で暗黙のリテラルコンストラクタが呼ばれているのか？Stringオブジェクトを生成して、newはいったい何をしているのか？それともこの場合の""はコンストラクタではない？？
+  - そもそも、`""`と`String.new`はまったくの別物。前者は文法(メソッドではない。コンパイル時に構文解析で処理される)後者はメソッド(オブジェクトを引数にとり、オブジェクトを返すメソッド)`""`が何やってるのかとか詳しく知りたくなったらRuby処理系の実装コードを読まないといけないかも。
 - Rubyってプロトタイプベースじゃないよね？？プロトタイプベースとクラスベースの違いが分からなくなってきた…(一度JSで理解したので復習しないと)
+- ブラウザから見たとき、assets/images/rails.pngがassets/rails-83491319.pngになっているのはどういう仕組み？何が起きているのかわからない。
+- アセットパイプラインがどういう仕組みになっているのかわからない。どこが指示してどのCSSがどこにまとめられているんだろうか
+- HTTPの標準として、リダイレクトの時に完全なURLが要求される→ソースは？
+- `get 'help', to: 'static_pages#help'`これは、`get('help', 'to'=>'static_pages#help')`と同じか？ruby,railsの記法に慣れない…
+- hoge_urlとhoge_pathは組み込みなのか？
 
 Roadmap
 - hello app(1)
@@ -203,6 +210,11 @@ git checkout -b <name>
 - `kill [killcode] [pid]` : プロセスのkill
 - `spring stop` : springプロセスを停止
 - `pkill -15 -f spring` : 一括
+
+- curl
+```
+
+```
 
 # 1章
 - ハードスキル(操作方法:定型的)、ソフトスキル(デバッグ:定型化しにくい)の両方が必要。
@@ -1259,3 +1271,225 @@ irb(main):011:0> u.alphabetical_name.split(',').reverse
 irb(main):012:0> u.alphabetical_name.split(', ').reverse
 => ["john", "kelly"]
 ```
+
+# 5章
+- パーシャル、Railsのルーティング、Asset Pipeline, Sassについて学ぶ。
+- レイアウトファイル(application.html.erb)
+- IE9より小さいものに対応(条件付きコメント、Railsではなく、IEの機能)
+```
+<!--[if lt IE 9]>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/r29/html5.min.js">
+  </script>
+<![endif]-->
+```
+- `link_to [リンクテキスト] [URL]` Railsヘルパー(アンカータグaが最終的に生成される)
+  - この段階では#にしておく(後で置き換える、とりあえずの意味。)
+- `image_tag`ヘルパー: アセットパイプラインを通してapp/assets/imagesディレクトリの中から探してくれる
+- HTMLで見るとこんな感じ
+- 文字列が追加されているのは、rails.pngを変更したとき、ブラウザのキャッシュにヒットさせないようにするため。
+- `<img all="Rails logo" src="/assets/rails-c094bc3a4bf50e5bb477109e5cb0d213af27ad75b481c4df249f50974dbeefe6.png" alt="Rails">`
+- さらに、assets/にあるように見せている→ファイルを高速にブラウザに渡すため
+- Bootstrapはレスポンシブ
+- BootstrapはLESSCSS言語、でもrailsではSass→LESSをSassに変換するgemを導入
+- partialはレイアウトをまとめる機能(HTML importっぽい感じ)
+- `render`rails helperを用いて、レイアウトを別のとこからもってくることができる。
+- `render 'layouts/hoge'`に対応するのは`app/views/layouts/_hoge.html.erb`になる(アンダースコアに注意)
+- Sass AssetPipeline
+- アセットディレクトリ(置き場)、マニフェストファイル(置き場からどのコードを使うか)、プリプロセッサエンジン(コードをプリプロセッサエンジンを用いて実行、ブラウザに配信できるように結合)の三つが理解の対象。
+- app/assets, lib/assets, vendor/assetsの3つのディレクトリがある。
+- app/assets/stylesheets/application.cssの中身
+```
+*= require_tree .
+*= require_self
+```
+- これが大事。sprocketsがファイルを読み込むときに使う。→ http://railsguides.jp/asset_pipeline.html も参照。
+- プリプロエンジンは、js.erb.coffeeみたいなものも処理できる。
+- AssetPipelineによってcssはapplication.css, JSはjavascripts.jsにまとめられ、高速化が図れる(本番環境用に、ファイルサイズを最小化する)
+- Sass: nest, 変数→可読性高い(ネストは可読性低いのでは)
+- #で代用していたリンクの置き換え
+- `/hoge`と`hoge_path`が対応する
+- RailsのルートURL
+- pathとurlの違い→pathは相対、urlは絶対
+- 基本pathを使う、リダイレクトのみurlをつかう。
+- error: contact page
+```
+5 tests, 0 assertions, 0 failures, 5 errors, 0 skips
+ 1) Error:
+StaticPagesControllerTest#test_should_get_about:
+ActionView::Template::Error: undefined local variable or method `about_path' for #<#<Class:0x00007f0436ec2188>:0x00007f041800f4b0>
+    app/views/layouts/_footer.html.erb:8:in `_app_views_layouts__footer_html_erb__2683407668703088844_69828063957440'
+    app/views/layouts/application.html.erb:12:in `_app_views_layouts_application_html_erb__2030040032658899824_69828038746000'
+    test/controllers/static_pages_controller_test.rb:27:in `block in <class:StaticPagesControllerTest>'
+
+  2) Error:
+StaticPagesControllerTest#test_should_get_help:
+ActionView::Template::Error: undefined local variable or method `about_path' for #<#<Class:0x00007f0436ec2188>:0x00007f0439da38a8>
+    app/views/layouts/_footer.html.erb:8:in `_app_views_layouts__footer_html_erb__2683407668703088844_69828063957440'
+    app/views/layouts/application.html.erb:12:in `_app_views_layouts_application_html_erb__2030040032658899824_69828038746000'
+    test/controllers/static_pages_controller_test.rb:21:in `block in <class:StaticPagesControllerTest>'
+
+  3) Error:
+StaticPagesControllerTest#test_should_get_root:
+ActionView::Template::Error: undefined local variable or method `about_path' for #<#<Class:0x00007f0436ec2188>:0x00007f0439ccfe18>
+    app/views/layouts/_footer.html.erb:8:in `_app_views_layouts__footer_html_erb__2683407668703088844_69828063957440'
+    app/views/layouts/application.html.erb:12:in `_app_views_layouts_application_html_erb__2030040032658899824_69828038746000'
+    test/controllers/static_pages_controller_test.rb:10:in `block in <class:StaticPagesControllerTest>'
+
+  4) Error:
+StaticPagesControllerTest#test_should_get_contact:
+ActionView::Template::Error: undefined local variable or method `about_path' for #<#<Class:0x00007f0436ec2188>:0x00007f0439bb7198>
+    app/views/layouts/_footer.html.erb:8:in `_app_views_layouts__footer_html_erb__2683407668703088844_69828063957440'
+    app/views/layouts/application.html.erb:12:in `_app_views_layouts_application_html_erb__2030040032658899824_69828038746000'
+    test/controllers/static_pages_controller_test.rb:33:in `block in <class:StaticPagesControllerTest>'
+
+  5) Error:
+StaticPagesControllerTest#test_should_get_home:
+ActionView::Template::Error: undefined local variable or method `about_path' for #<#<Class:0x00007f0436ec2188>:0x00007f0439b1a168>
+    app/views/layouts/_footer.html.erb:8:in `_app_views_layouts__footer_html_erb__2683407668703088844_69828063957440'
+    app/views/layouts/application.html.erb:12:in `_app_views_layouts_application_html_erb__2030040032658899824_69828038746000'
+    test/controllers/static_pages_controller_test.rb:15:in `block in <class:StaticPagesControllerTest>'
+```
+- 1.2.3.4.5.`about_path`がやばい
+- 削除してみる
+- about_pathは後で定義する？定義しないまま使うとエラー(それはそうだけど、組み込み化と思ってしまった)
+- about_path, contact_pathを除くと`5 tests, 9 assertions, 0 failures, 0 errors, 0 skips`GREEN
+- `root 'static_pages#home'`これは、rootURL"/"をコントローラのアクションに紐づけている。
+- getルールを使ってルーティングを決める。testもルーティングの書き方を新しくする。
+- `4 tests, 8 assertions, 0 failures, 0 errors, 0 skips`
+- うまくいった…hoge_pathもhoge_urlと同じく組み込みっぽいな？
+
+## 演習
+1.2.3.猫
+```
+[vagrant@localhost sample_app]$ curl -OL cdn.learnenough.com/kitten.jpg
+[vagrant@localhost sample_app]$ mv kitten.jpg app/assets/images/kitten.jpg
+```
+```
+<%= link_to image_tag("kitten.jpg", all: "kitten logo") %>
+```
+1.2.3.パーシャルの追加
+- render→test red→partial→test green
+- `rails test -d`
+- `5 tests, 0 assertions, 0 failures, 5 errors, 0 skips`
+- `5 tests, 9 assertions, 0 failures, 0 errors, 0 skips`OK
+1.custom.scssをcss化
+```
+@import "bootstrap-sprockets";
+@import "bootstrap";
+
+/* mixins, variables, etc. */ 
+$gray-medium-light: #eaeaea;
+/* universal */
+body {
+    padding-top: 60px;
+}
+
+section {
+    overflow: auto;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.center {
+    text-align: center;
+    h1 {
+        margin-bottom: 10px;
+    }
+}
+
+/* typography */
+
+h1,h2,h3,h4,h5,h6 {
+    line-height: 1;
+}
+
+h1 {
+    font-size: 3em;
+    letter-spacing: -2px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.2em;
+    letter-spacing: -1px;
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: normal;
+    color: $gray-light;
+}
+
+p {
+    font-size: 1.1em;
+    line-height: 1.7em;
+}
+
+/* header */
+
+#logo {
+    float:left;
+    margin-right: 10px;
+    font-size: 1.7em;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    padding-top: 9px;
+    font-weight: bold;
+    &:hover {
+        color: white;
+        text-decoration: none;
+    }
+}
+
+img {
+    display: none;
+}
+
+/* footer */
+footer {
+    margin-top: 45px;
+    padding-top: 5px;
+    border-top: 1px solid $gray-medium-light;
+    color: $gray-light;
+
+    a {
+        color: $gray;
+        &:hover {
+            color: $gray-darker;
+        }
+    }
+
+    small {
+        float: left;
+    }
+
+    ul {
+        float:right;
+        list-style: none;
+        
+        li {
+            float: left;
+            margin-left: 15px;
+        }
+    }
+}
+
+```
+1.2.3.helf
+```
+get '/help', to: 'static_pages#help', as: 'helf'
+```
+```
+4 tests, 6 assertions, 0 failures, 1 errors, 0 skips
+```
+直す
+test/controller/..
+```
+get helf_path
+```
+```
+4 tests, 8 assertions, 0 failures, 0 errors, 0 skips
+```
+GREEN
