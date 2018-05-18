@@ -1584,3 +1584,8 @@ ActionView::Template::Error: undefined local variable or method `signup_path' fo
 1 tests, 8 assertions, 0 failures, 0 errors, 0 skips
 ```
 - GREEN
+
+# 6章
+- 
+
+## 演習
