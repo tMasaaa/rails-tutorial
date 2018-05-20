@@ -93,6 +93,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - `get 'help', to: 'static_pages#help'`これは、`get('help', 'to'=>'static_pages#help')`と同じか？ruby,railsの記法に慣れない…
 - hoge_urlとhoge_pathは組み込みなのか？
 - これいちいちcontrollerとかviewとか更新する必要があってつらいんだけどリスト作ったほうがいいな？
+- githubから持ってきてやろうとしたらpgでエラー吐いた。分からなかったのでpgのところコメントアウトした。
 
 Roadmap
 - hello app(1)
@@ -1597,5 +1598,6 @@ ActionView::Template::Error: undefined local variable or method `signup_path' fo
 - 情報入力場所と、データベースのやりとりに使うライブラリ「ActiveRecord」
 - ActiveRecordのメソッド: データオブジェクトの作成/保存/検索
 - Migration: データの定義をRubyで記述できる。
+- 
 
 ## 演習
