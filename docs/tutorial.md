@@ -94,6 +94,32 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - hoge_urlとhoge_pathは組み込みなのか？
 - これいちいちcontrollerとかviewとか更新する必要があってつらいんだけどリスト作ったほうがいいな？
 - githubから持ってきてやろうとしたらpgでエラー吐いた。分からなかったのでpgのところコメントアウトした。
+- わからん。トラフィック量の多さが原因の本質なのか？
+```
+アリスはサンプルアプリケーションにユーザー登録します。メールアドレスはalice@wonderland.comです。
+アリスは誤って “Submit” を素早く2回クリックしてしまいます。そのためリクエストが2つ連続で送信されます。
+次のようなことが順に発生します。リクエスト1は、検証にパスするユーザーをメモリー上に作成します。リクエスト2でも同じことが起きます。リクエスト1のユーザーが保存され、リクエスト2のユーザーも保存されます。
+この結果、一意性の検証が行われているにもかかわらず、同じメールアドレスを持つ2つのユーザーレコードが作成されてしまいます。
+```
+- 2.downcase!
+```
+Failure:
+UserTest#test_email_addresses_should_be_unique [/home/vagrant/rails/rails-tutorial/project/sample_app/test/models/user_test.rb:52]:
+Expected true to be nil or false
+```
+- failする。save前にdowncaseさせるので、
+```
+  test "email addresses should be unique" do
+    duplicate_user = @user.dup
+    duplicate_user.email = @user.email.upcase
+    @user.save
+    assert_not duplicate_user.valid?
+  end
+```
+  - ここでおかしなる。あれなんでだ原因わからん
+  - とりあえず、!を消して次に進もう。
+- ハッシュ化の仕組み
+
 
 Roadmap
 - hello app(1)
@@ -1598,6 +1624,71 @@ ActionView::Template::Error: undefined local variable or method `signup_path' fo
 - 情報入力場所と、データベースのやりとりに使うライブラリ「ActiveRecord」
 - ActiveRecordのメソッド: データオブジェクトの作成/保存/検索
 - Migration: データの定義をRubyで記述できる。
-- 
+- duplicate
+- テストケースの作成: dup
+- メールアドレスでは、大文字小文字が区別されないので、dupをupcaseしてやる
+- トラフィックが多い場合、メモリ上に同じユーザーができてパスしてしまう可能性がある。データベース上で一意になるようにする必要がある。
+- また、データベース上でもupcase,downcaseが同じものとして扱われるようにする。→保存する前に小文字にしてしまう。
+- コールバック: 特定の時点で呼び出されるメソッド
+- error
+```
+add_index(:users, :email, {:unique=>true})
+```
+- ここでなにかが起こっている
+- なんか治った`rails db migrate`を実行した、あと`rails/bin`にchmod777しただけ。よくわからない。
+- セキュアなパスワードを追加する
+- ハッシュ化
+- データ属性の仕組み
+- db migrate
+```
+[vagrant@localhost sample_app]$ rails db:migrate
+== 20180521012854 AddPasswordDigestToUsers: migrating =========================
+-- add_column(:users, :password_digest, :string)
+   -> 0.0010s
+== 20180521012854 AddPasswordDigestToUsers: migrated (0.0010s) ================
+```
+- test RED
+```
+Failure:
+UserTest#test_should_be_valid [/home/vagrant/rails/rails-tutorial/project/sample_app/test/models/user_test.rb:9]:
+Expected false to be truthy.
+```
 
 ## 演習
+2.downcase!
+```
+Failure:
+UserTest#test_email_addresses_should_be_unique [/home/vagrant/rails/rails-tutorial/project/sample_app/test/models/user_test.rb:52]:
+Expected true to be nil or false
+```
+- failする。save前にdowncaseさせるので、
+```
+  test "email addresses should be unique" do
+    duplicate_user = @user.dup
+    duplicate_user.email = @user.email.upcase
+    @user.save
+    assert_not duplicate_user.valid?
+  end
+```
+- ここでおかしなる。あれなんでだ原因わからん
+- とりあえず、!を消して次に進もう。
+1.2.valid?
+- password can't be blank
+```
+irb(main):001:0> u=User(name: "f", email: "a@g.com")
+Traceback (most recent call last):
+        1: from (irb):1
+NoMethodError (undefined method `User' for main:Object)
+irb(main):002:0> u=User.new(name: "f", email: "a@g.com")
+=> #<User id: nil, name: "f", email: "a@g.com", created_at: nil, updated_at: nil, password_digest: nil>
+irb(main):003:0> u.valid?
+  User Exists (0.3ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) LIMIT ?  [["email", "a@g.com"], ["LIMIT", 1]]
+=> false
+irb(main):004:0> u.error.messages
+Traceback (most recent call last):
+        1: from (irb):4
+NoMethodError (undefined method `error' for #<User:0x00007f12440c10b8>
+Did you mean?  errors)
+irb(main):005:0> u.errors.messages
+=> {:password=>["can't be blank"]}
+```
