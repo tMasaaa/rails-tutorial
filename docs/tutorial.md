@@ -119,6 +119,31 @@ Expected true to be nil or false
   - ここでおかしなる。あれなんでだ原因わからん
   - とりあえず、!を消して次に進もう。
 - ハッシュ化の仕組み
+- 1.2.3.userオブジェクト
+  - saveできない: 理由がわからない
+  - 検証を回避しているから？検証ってなんの？
+```
+irb(main):010:0> u.save
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) AND ("users"."id" != ?) LIMIT ?  [["email", "hoge@sample.com"], ["id", 1], ["LIMIT", 1]]
+   (0.1ms)  rollback transaction
+=> false
+```
+```
+irb(main):011:0> u.update_attributes(name: "bakemochi")
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) AND ("users"."id" != ?) LIMIT ?  [["email", "hoge@sample.com"], ["id", 1], ["LIMIT", 1]]
+   (0.1ms)  rollback transaction
+=> false
+```
+```
+irb(main):013:0> u.update_attribute(:name, "bakemochi")
+   (0.1ms)  begin transaction
+  SQL (0.5ms)  UPDATE "users" SET "name" = ?, "updated_at" = ? WHERE "users"."id" = ?  [["name", "bakemochi"], ["updated_at", "2018-05-21 05:51:01.981999"], ["id", 1]]
+   (59.4ms)  commit transaction
+=> true
+```
+
 
 
 Roadmap
@@ -1653,6 +1678,15 @@ Failure:
 UserTest#test_should_be_valid [/home/vagrant/rails/rails-tutorial/project/sample_app/test/models/user_test.rb:9]:
 Expected false to be truthy.
 ```
+- パスワードの最小文字数を設定(6文字以上、空でない)
+```
+11 tests, 19 assertions, 0 failures, 0 errors, 0 skips
+```
+- 新規ユーザーの作成
+- authenticate
+  - !!user.authenticate("right_string")でtrue返す。
+- Userモデルを作成、name,email,password属性を加え、validationを加えた。
+
 
 ## 演習
 2.downcase!
@@ -1691,4 +1725,33 @@ NoMethodError (undefined method `error' for #<User:0x00007f12440c10b8>
 Did you mean?  errors)
 irb(main):005:0> u.errors.messages
 => {:password=>["can't be blank"]}
+```
+1.2.short password?
+```
+irb(main):003:0> u.errors.messages
+=> {:password=>["is too short (minimum is 6 characters)"]}
+```
+1.2.3.userオブジェクト
+- saveできない: 理由がわからない
+- 検証を回避しているから？検証ってなんの？
+```
+irb(main):010:0> u.save
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) AND ("users"."id" != ?) LIMIT ?  [["email", "hoge@sample.com"], ["id", 1], ["LIMIT", 1]]
+   (0.1ms)  rollback transaction
+=> false
+```
+```
+irb(main):011:0> u.update_attributes(name: "bakemochi")
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) AND ("users"."id" != ?) LIMIT ?  [["email", "hoge@sample.com"], ["id", 1], ["LIMIT", 1]]
+   (0.1ms)  rollback transaction
+=> false
+```
+```
+irb(main):013:0> u.update_attribute(:name, "bakemochi")
+   (0.1ms)  begin transaction
+  SQL (0.5ms)  UPDATE "users" SET "name" = ?, "updated_at" = ? WHERE "users"."id" = ?  [["name", "bakemochi"], ["updated_at", "2018-05-21 05:51:01.981999"], ["id", 1]]
+   (59.4ms)  commit transaction
+=> true
 ```
