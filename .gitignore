@@ -1,1 +1,61 @@
-/project/*
+#########################
+### sample_app ###
+# ignore bundle
+/project/sample_app/.bundle
+
+#ignore db
+/project/sample_app/db/*.sqlite3
+/project/sample_app/db/*.sqlite3-journal
+
+# ignore log tmp
+/project/sample_app/log/*
+/project/sample_app/tmp/*
+!/project/sample_app/log/.keep
+!/project/sample_app/tmp/.keep
+
+/project/sample_app/node_modules
+/project/sample_app/yarn-error.log
+
+/project/sample_app/.byebug_history
+# Ignore Spring files.
+/project/sample_app/spring/*.pid
+
+#########################
+### blog ###
+# ignore bundle
+/project/blog/.bundle
+
+#ignore db
+/project/blog/db/*.sqlite3
+/project/blog/db/*.sqlite3-journal
+
+# ignore log tmp
+/project/blog/log/*
+/project/blog/tmp/*
+!/project/blog/log/.keep
+!/project/blog/tmp/.keep
+
+/project/blog/node_modules
+/project/blog/yarn-error.log
+
+/project/blog/.byebug_history
+
+#########################
+### toy_app ###
+# ignore bundle
+/project/toy_app/.bundle
+
+#ignore db
+/project/toy_app/db/*.sqlite3
+/project/toy_app/db/*.sqlite3-journal
+
+# ignore log tmp
+/project/toy_app/log/*
+/project/toy_app/tmp/*
+!/project/toy_app/log/.keep
+!/project/toy_app/tmp/.keep
+
+/project/toy_app/node_modules
+/project/toy_app/yarn-error.log
+
+/project/toy_app/.byebug_history
