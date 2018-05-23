@@ -143,6 +143,26 @@ irb(main):013:0> u.update_attribute(:name, "bakemochi")
    (59.4ms)  commit transaction
 => true
 ```
+- `y`ってどういうメソッドだっけ…
+- vim-plug installした、PlugInstallした、でもemmet.vim使えない…
+  - already installed!からどうすればいいのかわからない…
+  - [解決]ctrl+yをいったん押して離して瞬時にカンマを打つ
+  - [解決]tabで対応するようにした
+- 1.なぜformを使わなかったのか？(7.2.2)
+  - 知るか
+- (7.3.2)脆弱性への対応だけどうーん、って感じ。嬉しさがわかりにくい
+- controller:usersと、routes.rbのが関係してそうな…？わからない(7.3.3)
+- フォーム用テスト
+- 失敗するやつを作るので、登録前と登録後でassert_no_difference=Countの数が変更されない、ということを確かめる。
+- テストのテストはどうするの？テストが正しいことをどこで保証しているのか？それとも自動化という意味合いでテストをしているのか？テストのテストをすることは実務であるのだろうか？
+- なぜでしょうか？わからない。(7.3.4)
+- テストむつかしいーーというかRailsの機能がわからなさすぎる…とりあえず一周して疑問点洗い出す作業をするしかない…
+- gitがうまくいかない
+```
+[vagrant@localhost rails-tutorial]$ git remote set-url origin git@github.com:tMasaaa/rails-tutorial.git
+fatal: No such remote 'origin'
+```
+- ssh認証がだめなのかと思ったけどid_rsaも.pubも存在していて、もうひとつのリポジトリではうまくいっている。謎
 
 
 
@@ -264,10 +284,12 @@ git checkout -b <name>
 - `spring stop` : springプロセスを停止
 - `pkill -15 -f spring` : 一括
 
-- curl
+- データベース便利コマンド
+```
+User.count
+User.first
 ```
 
-```
 
 # 1章
 - ハードスキル(操作方法:定型的)、ソフトスキル(デバッグ:定型化しにくい)の両方が必要。
@@ -1754,4 +1776,214 @@ irb(main):013:0> u.update_attribute(:name, "bakemochi")
   SQL (0.5ms)  UPDATE "users" SET "name" = ?, "updated_at" = ? WHERE "users"."id" = ?  [["name", "bakemochi"], ["updated_at", "2018-05-21 05:51:01.981999"], ["id", 1]]
    (59.4ms)  commit transaction
 => true
+```
+
+# 7章
+- ユーザー登録機能
+  - HTMLフォーム
+  - ユーザー新規作成、データベースへ保存
+  - ユーザープロフィール表示
+  - テスト
+- ビューはアプリケーションのデータベースから取り出した情報を使う動的なページ。
+```
+irb(main):001:0> Rails.env
+=> "development"
+```
+- となっているので、test,development,productionの3つの環境がある。
+- 他の環境にしたい場合
+```
+rails console test
+rails console production
+```
+```
+rails server --environment production
+rails server --environment test
+```
+```
+rails db:migrate RAILS_ENV=production
+```
+- この場合のREST→データのCURDをリソースとして扱う(HTTPプロトコルと同一視)ということ。user/1にGETリクエストを送ることと、(つまりshowアクション)id=1のユーザーを参照することを同一視。
+- うまくいってるっぽい
+```
+--- !ruby/object:ActionController::Parameters
+parameters: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  controller: users
+  action: show
+  id: '1'
+permitted: false
+```
+- debuggerメソッドをバグりそうなコードの近くに埋め込む
+- サーバーを立ち上げてるプロンプトでbyebugが起動
+- ctrl+Dでbyebugを抜けて、サーバーも消す。
+- Gravatar画像が表示されない→とりあえずF12してみるとdisplay:noneになっていた。前の演習でscssをいじったせい。
+- オプション引数とキーワード引数の違い
+- https://magazine.rubyist.net/articles/0041/0041-200Special-kwarg.html
+- よくわからないけど、可変長引数にできるなどキーワード引数のほうがメリット大きいみたい。
+- コンソールをctrl+Dしないと、ページ遷移がうまくいかないみたい。
+- form_forヘルパーメソッド: ActiveRecordのオブジェクト取り込み、フォームの構築
+- form_forについて
+- ブロックを引数にとる
+- fオブジェクトは、form要素に対応するメソッド→HTMLを返す、という仕組み。
+- ハッシュがUsersコントローラにparamsとして渡される。
+- Strong Parameters:
+- 脆弱性への対応だけどうーん、って感じ。嬉しさがわかりにくい
+- userというパラメータには裏にadminとかの属性があり、変更可能な属性の制限をかける必要がある。その制限は、Userコントローラの中で行うことが推奨されている。
+- エラーメッセージの追加
+- `user.errors.count`エラーカウント
+```
+>> user.errors.empty?
+=> false
+>> user.errors.any?
+=> true
+```
+- `pluralize`複数形を作るメソッド
+- `No template found for UsersController#create, rendering head :no_content`
+- create viewを作るのではなく、リダイレクトさせる。
+- `redirect_to user_url(@user)`
+- flash
+- 新規ユーザーへのwelcome messageと、その後そのメッセージを表示しないようにする
+- flash という変数で可能になる
+- ERBで、cssタグ`a-<%= xxx %>`みたいなのが可能
+- successクラスはBootstrapによるもの
+- content_tagヘルパーで<% <% %> %>のような入れ子構造を回避できる。
+
+
+
+
+## 演習
+1.about
+- YAMLは以下の通り。
+- コントローラはstatic_pages, アクションはabout
+```
+--- !ruby/object:ActionController::Parameters
+parameters: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  controller: static_pages
+  action: about
+permitted: false
+```
+2.attributes
+- 同じ。`y`ってどういうメソッドだっけ…
+```
+irb(main):004:0> puts u.attributes.to_yaml
+---
+id: 1
+name: bakemochi
+email: hoge@sample.com
+created_at: !ruby/object:ActiveSupport::TimeWithZone
+  utc: &1 2018-05-21 05:38:09.672015000 Z
+  zone: &2 !ruby/object:ActiveSupport::TimeZone
+    name: Etc/UTC
+  time: *1
+updated_at: !ruby/object:ActiveSupport::TimeWithZone
+  utc: &3 2018-05-21 05:51:01.981999000 Z
+  zone: *2
+  time: *3
+password_digest: "$2a$10$61U0bTQoQDF6pjqTvqt.QOIUiqaQcET7lR.Uq95D1K708ecFqXIoS"
+=> nil
+```
+```
+irb(main):005:0> y u.attributes
+---
+id: 1
+name: bakemochi
+email: hoge@sample.com
+created_at: !ruby/object:ActiveSupport::TimeWithZone
+  utc: &1 2018-05-21 05:38:09.672015000 Z
+  zone: &2 !ruby/object:ActiveSupport::TimeZone
+    name: Etc/UTC
+  time: *1
+updated_at: !ruby/object:ActiveSupport::TimeWithZone
+  utc: &3 2018-05-21 05:51:01.981999000 Z
+  zone: *2
+  time: *3
+password_digest: "$2a$10$61U0bTQoQDF6pjqTvqt.QOIUiqaQcET7lR.Uq95D1K708ecFqXIoS"
+=> nil
+```
+1.2.ERB
+```
+<%= @user.name %>, <%= @user.email %>
+<br>
+<%= Time.now %>
+<br>
+<%= @user.created_at %>, <%= @user.updated_at %>
+```
+1.2.debugger
+```
+(byebug) puts params.to_yaml
+--- !ruby/object:ActionController::Parameters
+parameters: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  controller: users
+  action: show
+  id: '1'
+permitted: false
+nil
+```
+```
+(byebug) @user
+nil
+```
+1.2.gravatar
+- 実装した
+- 違いは分からないが両方動いた
+- 参考 https://magazine.rubyist.net/articles/0041/0041-200Special-kwarg.html
+1.2.nome, foobar
+```
+undefined method `nome' for #<User:0x00007fdec4f9b370>
+Did you mean?  name
+```
+- 命名的に、変数なので簡単なほうが良いと思う。あと、foobarでは中に何が入っているのかわからない。
+1.なぜformを使わなかったのか？
+- 知るか
+1.admin=1
+```
+--- !ruby/object:ActionController::Parameters
+parameters: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  admin: '1'
+  controller: users
+  action: new
+permitted: false
+```
+1.2.password, URL
+- app/models/user.rbをいじる
+- controller:usersと、routes.rbのが関係してそうな…？わからない(7.3.3)
+```
+Password is too short (minimum is 5 characters)
+```
+1.2.3.4.test
+- なんか何も考えず移したらそういうことではなかった
+```
+Error:
+UsersSignupTest#test_invalid_signup_information:
+Nokogiri::CSS::SyntaxError: unexpected '#' after '[#<Nokogiri::CSS::Node:0x00007f4430bf3be8 @type=:ELEMENT_NAME, @value=["div"]>]'
+    test/integration/users_signup_test.rb:13:in `block in <class:UsersSignupTest>'
+```
+- ちょっとidのやつが見つからないらしい…どうしたもんかな
+- はいtypoー。explanationです。
+```
+Failure:
+UsersSignupTest#test_invalid_signup_information [/home/vagrant/rails/rails-tutorial/project/sample_app/test/integration/users_signup_test.rb:13]:
+Expected at least 1 element matching "div#error_exlanation", found 0..
+Expected 0 to be >= 1.
+```
+- なぜでしょうか？わからない。(7.3.4)
+1.2.確認
+- 確認するだけ
+1.2.シンボル
+```
+irb(main):006:0> "#{:success}"
+=> "success"
+```
+1.2.3.4.テスト リダイレクト
+```
+Error:
+UsersSignupTest#test_valid_signup_information:
+RuntimeError: not a redirect! 204 No Content
+    test/integration/users_signup_test.rb:26:in `block in <class:UsersSignupTest>'
+```
+- バグを検知する
+```
+Failure:
+UsersSignupTest#test_invalid_signup_information [/home/vagrant/rails/rails-tutorial/project/sample_app/test/integration/users_signup_test.rb:14]:
+Expected at least 1 element matching "div#error_explanation", found 0..
+Expected 0 to be >= 1.
 ```
