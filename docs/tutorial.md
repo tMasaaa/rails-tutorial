@@ -1,6 +1,6 @@
 # note
 理解度
-5.2.1 C
+
 
 理解度確認、疑問
 - Ruby gemの選定方法
@@ -93,6 +93,58 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 - `get 'help', to: 'static_pages#help'`これは、`get('help', 'to'=>'static_pages#help')`と同じか？ruby,railsの記法に慣れない…
 - hoge_urlとhoge_pathは組み込みなのか？
 - これいちいちcontrollerとかviewとか更新する必要があってつらいんだけどリスト作ったほうがいいな？
+- githubから持ってきてやろうとしたらpgでエラー吐いた。分からなかったのでpgのところコメントアウトした。
+- わからん。トラフィック量の多さが原因の本質なのか？
+```
+アリスはサンプルアプリケーションにユーザー登録します。メールアドレスはalice@wonderland.comです。
+アリスは誤って “Submit” を素早く2回クリックしてしまいます。そのためリクエストが2つ連続で送信されます。
+次のようなことが順に発生します。リクエスト1は、検証にパスするユーザーをメモリー上に作成します。リクエスト2でも同じことが起きます。リクエスト1のユーザーが保存され、リクエスト2のユーザーも保存されます。
+この結果、一意性の検証が行われているにもかかわらず、同じメールアドレスを持つ2つのユーザーレコードが作成されてしまいます。
+```
+- 2.downcase!
+```
+Failure:
+UserTest#test_email_addresses_should_be_unique [/home/vagrant/rails/rails-tutorial/project/sample_app/test/models/user_test.rb:52]:
+Expected true to be nil or false
+```
+- failする。save前にdowncaseさせるので、
+```
+  test "email addresses should be unique" do
+    duplicate_user = @user.dup
+    duplicate_user.email = @user.email.upcase
+    @user.save
+    assert_not duplicate_user.valid?
+  end
+```
+  - ここでおかしなる。あれなんでだ原因わからん
+  - とりあえず、!を消して次に進もう。
+- ハッシュ化の仕組み
+- 1.2.3.userオブジェクト
+  - saveできない: 理由がわからない
+  - 検証を回避しているから？検証ってなんの？
+```
+irb(main):010:0> u.save
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) AND ("users"."id" != ?) LIMIT ?  [["email", "hoge@sample.com"], ["id", 1], ["LIMIT", 1]]
+   (0.1ms)  rollback transaction
+=> false
+```
+```
+irb(main):011:0> u.update_attributes(name: "bakemochi")
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) AND ("users"."id" != ?) LIMIT ?  [["email", "hoge@sample.com"], ["id", 1], ["LIMIT", 1]]
+   (0.1ms)  rollback transaction
+=> false
+```
+```
+irb(main):013:0> u.update_attribute(:name, "bakemochi")
+   (0.1ms)  begin transaction
+  SQL (0.5ms)  UPDATE "users" SET "name" = ?, "updated_at" = ? WHERE "users"."id" = ?  [["name", "bakemochi"], ["updated_at", "2018-05-21 05:51:01.981999"], ["id", 1]]
+   (59.4ms)  commit transaction
+=> true
+```
+
+
 
 Roadmap
 - hello app(1)
@@ -1586,6 +1638,120 @@ ActionView::Template::Error: undefined local variable or method `signup_path' fo
 - GREEN
 
 # 6章
-- 
+- 以下12章までユーザー登録ページを作っていく。
+- ユーザーのデータモデルの作成と、データを保存する手段の確保について学ぶ。
+- 10章から不正アクセスを取り扱う方法
+- 11,12章でメールアドレスを使ってアカウントを有効化する方法、パスワードを再設定する方法について学ぶ。
+- ログインと認証システムを学ぶ感じ。
+- 一から作っておけば、既存のをカスタマイズするときに困らなくなる。
+- ユーザー登録でまずはじめにすることは、ユーザーの情報を保存するデータ構造を作成すること。
+- Railsでは、データ構造を「モデル」という。
+- 情報入力場所と、データベースのやりとりに使うライブラリ「ActiveRecord」
+- ActiveRecordのメソッド: データオブジェクトの作成/保存/検索
+- Migration: データの定義をRubyで記述できる。
+- duplicate
+- テストケースの作成: dup
+- メールアドレスでは、大文字小文字が区別されないので、dupをupcaseしてやる
+- トラフィックが多い場合、メモリ上に同じユーザーができてパスしてしまう可能性がある。データベース上で一意になるようにする必要がある。
+- また、データベース上でもupcase,downcaseが同じものとして扱われるようにする。→保存する前に小文字にしてしまう。
+- コールバック: 特定の時点で呼び出されるメソッド
+- error
+```
+add_index(:users, :email, {:unique=>true})
+```
+- ここでなにかが起こっている
+- なんか治った`rails db migrate`を実行した、あと`rails/bin`にchmod777しただけ。よくわからない。
+- セキュアなパスワードを追加する
+- ハッシュ化
+- データ属性の仕組み
+- db migrate
+```
+[vagrant@localhost sample_app]$ rails db:migrate
+== 20180521012854 AddPasswordDigestToUsers: migrating =========================
+-- add_column(:users, :password_digest, :string)
+   -> 0.0010s
+== 20180521012854 AddPasswordDigestToUsers: migrated (0.0010s) ================
+```
+- test RED
+```
+Failure:
+UserTest#test_should_be_valid [/home/vagrant/rails/rails-tutorial/project/sample_app/test/models/user_test.rb:9]:
+Expected false to be truthy.
+```
+- パスワードの最小文字数を設定(6文字以上、空でない)
+```
+11 tests, 19 assertions, 0 failures, 0 errors, 0 skips
+```
+- 新規ユーザーの作成
+- authenticate
+  - !!user.authenticate("right_string")でtrue返す。
+- Userモデルを作成、name,email,password属性を加え、validationを加えた。
+
 
 ## 演習
+2.downcase!
+```
+Failure:
+UserTest#test_email_addresses_should_be_unique [/home/vagrant/rails/rails-tutorial/project/sample_app/test/models/user_test.rb:52]:
+Expected true to be nil or false
+```
+- failする。save前にdowncaseさせるので、
+```
+  test "email addresses should be unique" do
+    duplicate_user = @user.dup
+    duplicate_user.email = @user.email.upcase
+    @user.save
+    assert_not duplicate_user.valid?
+  end
+```
+- ここでおかしなる。あれなんでだ原因わからん
+- とりあえず、!を消して次に進もう。
+1.2.valid?
+- password can't be blank
+```
+irb(main):001:0> u=User(name: "f", email: "a@g.com")
+Traceback (most recent call last):
+        1: from (irb):1
+NoMethodError (undefined method `User' for main:Object)
+irb(main):002:0> u=User.new(name: "f", email: "a@g.com")
+=> #<User id: nil, name: "f", email: "a@g.com", created_at: nil, updated_at: nil, password_digest: nil>
+irb(main):003:0> u.valid?
+  User Exists (0.3ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) LIMIT ?  [["email", "a@g.com"], ["LIMIT", 1]]
+=> false
+irb(main):004:0> u.error.messages
+Traceback (most recent call last):
+        1: from (irb):4
+NoMethodError (undefined method `error' for #<User:0x00007f12440c10b8>
+Did you mean?  errors)
+irb(main):005:0> u.errors.messages
+=> {:password=>["can't be blank"]}
+```
+1.2.short password?
+```
+irb(main):003:0> u.errors.messages
+=> {:password=>["is too short (minimum is 6 characters)"]}
+```
+1.2.3.userオブジェクト
+- saveできない: 理由がわからない
+- 検証を回避しているから？検証ってなんの？
+```
+irb(main):010:0> u.save
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) AND ("users"."id" != ?) LIMIT ?  [["email", "hoge@sample.com"], ["id", 1], ["LIMIT", 1]]
+   (0.1ms)  rollback transaction
+=> false
+```
+```
+irb(main):011:0> u.update_attributes(name: "bakemochi")
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER(?) AND ("users"."id" != ?) LIMIT ?  [["email", "hoge@sample.com"], ["id", 1], ["LIMIT", 1]]
+   (0.1ms)  rollback transaction
+=> false
+```
+```
+irb(main):013:0> u.update_attribute(:name, "bakemochi")
+   (0.1ms)  begin transaction
+  SQL (0.5ms)  UPDATE "users" SET "name" = ?, "updated_at" = ? WHERE "users"."id" = ?  [["name", "bakemochi"], ["updated_at", "2018-05-21 05:51:01.981999"], ["id", 1]]
+   (59.4ms)  commit transaction
+=> true
+```
